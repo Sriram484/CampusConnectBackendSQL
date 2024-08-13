@@ -64,6 +64,9 @@ public class Users implements UserDetails {
     @CollectionTable(name = "enrolled_courses", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "course_id")
     private Set<Long> enrolledCourseIds = new HashSet<>();
+
+    @Column(name = "cart_id")
+    private Long cartId;
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

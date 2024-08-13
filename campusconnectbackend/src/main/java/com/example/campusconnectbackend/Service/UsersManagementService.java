@@ -9,7 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.campusconnectbackend.DTO.ReqRes;
+import com.example.campusconnectbackend.Model.Cart;
 import com.example.campusconnectbackend.Model.Users;
+import com.example.campusconnectbackend.Repository.CartRepository;
 import com.example.campusconnectbackend.Repository.UserRepo;
 
 import java.util.HashMap;
@@ -22,14 +24,15 @@ public class UsersManagementService {
     @Autowired
     private UserRepo usersRepo;
     @Autowired
+    private CartRepository cartRepo;
+    @Autowired
     private JWTUtils jwtUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
-    public ReqRes register(ReqRes registrationRequest){
+    public ReqRes register(ReqRes registrationRequest) {
         ReqRes resp = new ReqRes();
 
         try {
@@ -50,21 +53,27 @@ public class UsersManagementService {
             ourUser.setUserProfileImage("");
             ourUser.setProfilePublic(true);
             Users ourUsersResult = usersRepo.save(ourUser);
-            if (ourUsersResult.getId()>0) {
+            if (ourUsersResult.getId() > 0) {
+                Cart cart = new Cart();
+                cart.setUserId(ourUsersResult.getId());
+                Cart savedCart = cartRepo.save(cart);
+
+                // Update user with cartId
+                ourUsersResult.setCartId(savedCart.getId());
+                usersRepo.save(ourUsersResult);
                 resp.setOurUsers((ourUsersResult));
                 resp.setMessage("User Saved Successfully");
                 resp.setStatusCode(200);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             resp.setStatusCode(500);
             resp.setError(e.getMessage());
         }
         return resp;
     }
 
-
-    public ReqRes login(ReqRes loginRequest){
+    public ReqRes login(ReqRes loginRequest) {
         ReqRes response = new ReqRes();
         try {
             authenticationManager
@@ -80,7 +89,7 @@ public class UsersManagementService {
             response.setExpirationTime("24Hrs");
             response.setMessage("Successfully Logged In");
 
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage(e.getMessage());
         }
@@ -108,8 +117,6 @@ public class UsersManagementService {
         }
     }
 
-
-
     public ReqRes updateUser(Integer userId, Users updatedUser) {
         ReqRes reqRes = new ReqRes();
         try {
@@ -129,8 +136,7 @@ public class UsersManagementService {
                 existingUser.setWebsite(updatedUser.getWebsite());
                 existingUser.setYouTube(updatedUser.getYouTube());
                 existingUser.setUserProfileImage(updatedUser.getUserProfileImage());
-                existingUser.setProfilePublic(updatedUser.getProfilePublic()); 
-
+                existingUser.setProfilePublic(updatedUser.getProfilePublic());
 
                 Users savedUser = usersRepo.save(existingUser);
                 reqRes.setOurUsers(savedUser);
@@ -147,8 +153,7 @@ public class UsersManagementService {
         return reqRes;
     }
 
-
-    public ReqRes getMyInfo(String email){
+    public ReqRes getMyInfo(String email) {
         ReqRes reqRes = new ReqRes();
         try {
             Optional<Users> userOptional = usersRepo.findByEmail(email);
@@ -161,7 +166,7 @@ public class UsersManagementService {
                 reqRes.setMessage("User not found for update");
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             reqRes.setStatusCode(500);
             reqRes.setMessage("Error occurred while getting user info: " + e.getMessage());
         }
@@ -177,6 +182,4 @@ public class UsersManagementService {
         usersRepo.save(user);
     }
 
-    
- 
 }

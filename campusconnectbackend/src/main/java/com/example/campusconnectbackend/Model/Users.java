@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -37,6 +38,12 @@ public class Users implements UserDetails {
     private String twitter;
     private String faceBook;
     private String youTube;
+    private boolean isProfilePublic; // Field to store profile visibility
+    
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private String userProfileImage; // Field to store Base64 encoded image
+
 
     @OneToMany(mappedBy = "blockedPerson", cascade = CascadeType.ALL)
     @JsonManagedReference
@@ -46,6 +53,17 @@ public class Users implements UserDetails {
     @OneToMany(mappedBy = "reportedPerson", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Set<ReportedUser> reportedUsers;
+
+    
+    @ElementCollection
+    @CollectionTable(name = "created_courses", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "course_id")
+    private Set<Long> createdCourseIds = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "enrolled_courses", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "course_id")
+    private Set<Long> enrolledCourseIds = new HashSet<>();
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -88,5 +106,9 @@ public class Users implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public boolean getProfilePublic() {
+        return isProfilePublic;
     }
 }

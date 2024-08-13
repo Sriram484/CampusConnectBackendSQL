@@ -47,6 +47,8 @@ public class UsersManagementService {
             ourUser.setTwitter("");
             ourUser.setFaceBook("");
             ourUser.setYouTube("");
+            ourUser.setUserProfileImage("");
+            ourUser.setProfilePublic(true);
             Users ourUsersResult = usersRepo.save(ourUser);
             if (ourUsersResult.getId()>0) {
                 resp.setOurUsers((ourUsersResult));
@@ -126,6 +128,9 @@ public class UsersManagementService {
                 existingUser.setTwitter(updatedUser.getTwitter());
                 existingUser.setWebsite(updatedUser.getWebsite());
                 existingUser.setYouTube(updatedUser.getYouTube());
+                existingUser.setUserProfileImage(updatedUser.getUserProfileImage());
+                existingUser.setProfilePublic(updatedUser.getProfilePublic()); 
+
 
                 Users savedUser = usersRepo.save(existingUser);
                 reqRes.setOurUsers(savedUser);
@@ -163,6 +168,15 @@ public class UsersManagementService {
         return reqRes;
 
     }
+
+    public Optional<Users> findByEmail(String email) {
+        return usersRepo.findByEmail(email);
+    }
+
+    public void save(Users user) {
+        usersRepo.save(user);
+    }
+
     
  
 }

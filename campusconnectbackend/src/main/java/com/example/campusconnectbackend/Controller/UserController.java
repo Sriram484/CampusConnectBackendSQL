@@ -30,6 +30,7 @@ public class UserController {
     public ResponseEntity<ReqRes> updateUser(@PathVariable Integer userId, @RequestBody Users reqres) {
         return ResponseEntity.ok(usersManagementService.updateUser(userId, reqres));
     }
+    
     @GetMapping("/adminuser/get-profile")
     public ResponseEntity<ReqRes> getMyProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
